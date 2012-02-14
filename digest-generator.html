@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Digest Generater</title>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript">
+if (!Array.prototype.shuffle) {
+    Array.prototype.shuffle = function() { for(var j, x, i = this.length; i; j = parseInt(Math.random() * i), x = this[--i], this[i] = this[j], this[j] = x); return this; };
+}
+
+var alphabet_upcase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var alphabet_downcase = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz';
+var digital = '0123456789012345678901234567890123456789';
+var symbol = '*)@_&.=-,$(;^~!%[}?*)@_&.=-,$(;^~!%[}?*)';
+
+var digest_defind = '';
+digest_defind += "// Private Salt for digest function\n";
+digest_defind += "define('DIGEST_SALT', '{#DIGEST_SALT}');\n";
+digest_defind += "define('DIGEST_KEY1', '{#DIGEST_KEY1}}');\n";
+digest_defind += "define('DIGEST_KEY2', '{#DIGEST_KEY2}}');\n";
+
+$(document).ready(function () {
+	
+	$('a[href*=#generate]').bind('click', function (event) {
+		event.preventDefault();
+		var new_string = '';
+		var fill_fist = '';
+
+		if ( true == $('#upcase_alphabet').prop('checked') ) {
+			new_string += alphabet_upcase;
+			fill_fist += alphabet_upcase;
+		}
+		
+		if ( true == $('#downcase_alphabet').prop('checked') ) {
+			new_string += alphabet_downcase;
+			fill_fist += alphabet_downcase;
+		}
+		
+		if ( true == $('#number').prop('checked') ) {
+			new_string += digital;
+		}
+		
+		if ( true == $('#symbol').prop('checked') ) {
+			new_string += symbol;
+			fill_fist += symbol;
+		}
+
+		if ( 0 < new_string.length ) {
+			$('#password_8').val(String(new_string.split('').shuffle().shuffle().join('')).substr(0, 8));
+			$('#password_12').val(String(new_string.split('').shuffle().shuffle().join('')).substr(0, 12));
+			$('#password_16').val(String(new_string.split('').shuffle().shuffle().join('')).substr(0, 16));
+			$('#password_18').val(String(new_string.split('').shuffle().shuffle().join('')).substr(0, 18));
+			$('#password_32').val(String(new_string.split('').shuffle().shuffle().join('')).substr(0, 32));
+			
+			if ( true == $('#upcase_alphabet').prop('checked') || true == $('#downcase_alphabet').prop('checked')  ) {
+				$('[name*=password]').each(function(i, self) {
+					var fill = String(fill_fist.split('').shuffle().shuffle().join('')).substr(0, 1);
+					self = $(self);
+					self.val(self.val().replace(/^\d/, fill));
+				});
+			}
+		}
+
+		var new_digest_key = '0123456789';
+		var new_salt = digest_defind;
+		new_salt = new_salt.replace('{#DIGEST_SALT}', String((alphabet_upcase+alphabet_downcase+digital).split('').shuffle().shuffle().join('')).substr(0, 16));
+		new_salt = new_salt.replace('{#DIGEST_KEY1}', String(new_digest_key.split('').shuffle().shuffle().join('')).substr(0, 10));
+		new_salt = new_salt.replace('{#DIGEST_KEY2}', String(new_digest_key.split('').shuffle().shuffle().join('')).substr(0, 10));
+
+		$('#digest_defind').val(new_salt);
+	});
+	
+	$('input,textarea').bind('click', function (event) { this.select() } );
+});
+</script>
+</head>
+
+<body>
+<h1>Digest Generater</h1>
+<table width="700" border="0" cellspacing="2" cellpadding="1">
+<tr>
+<td colspan="2">
+<table cellpadding="0" cellspacing="3">
+<tr>
+<th>Digest Style </th>
+<td><input type="checkbox" id="upcase_alphabet" name="upcase_alphabet" /></td>
+<td><label for="upcase_alphabet">ABC</label></td>
+<td><input type="checkbox" id="downcase_alphabet" name="downcase_alphabet" /></td>
+<td><label for="downcase_alphabet">abc</label></td>
+<td><input type="checkbox" id="number" name="number" /></td>
+<td><label for="number">12345</label></td>
+<td><input type="checkbox" id="symbol" name="symbol" /></td>
+<td><label for="symbol">~!@#()</label></td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td width="210"><strong>PASSWORD OR DIGEST 8</strong></td>
+<td width="480"><input type="text" name="password_8" id="password_8" style="width:97%" /></td>
+</tr>
+<tr>
+<td width="210"><strong>PASSWORD OR DIGEST 12</strong></td>
+<td width="480"><input type="text" name="password_12" id="password_12" style="width:97%" /></td>
+</tr>
+<tr>
+<td width="210"><strong>PASSWORD OR DIGEST 16</strong></td>
+<td width="480"><input type="text" name="password_16" id="password_16" style="width:97%" /></td>
+</tr>
+<tr>
+<td width="210"><strong>PASSWORD OR DIGEST 18</strong></td>
+<td width="480"><input type="text" name="password_18" id="password_18" style="width:97%" /></td>
+</tr>
+<tr>
+<td width="210"><strong>PASSWORD OR DIGEST 32</strong></td>
+<td width="480"><input type="text" name="password_32" id="password_32" style="width:97%" /></td>
+</tr>
+<tr>
+<td colspan="2"><a href="#generate">Generate</a></td>
+</tr>
+<tr>
+<td colspan="2">
+<textarea id="digest_defind" style="width:300px; height:100px" readonly="readonly"></textarea>
+<textarea style="width:300px; height:100px" readonly="readonly">
+function digest ( $string ) {
+	return strtr(md5(md5($string).DIGEST_SALT), DIGEST_KEY1, DIGEST_KEY2);
+}
+</textarea>
+</td>
+</tr>
+</table>
+</body>
+</html>
